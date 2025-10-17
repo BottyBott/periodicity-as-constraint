@@ -23,6 +23,8 @@ class LoaderValidationTestCase(unittest.TestCase):
         self.assertTrue(pd.api.types.is_integer_dtype(df["Z"]))
         self.assertTrue(pd.api.types.is_string_dtype(df["symbol"]))
         self.assertIn(("Cn", "boiling_point_k"), df.attrs["uncertainty_notes"])
+        self.assertIn(("Cn", "boiling_point_k"), df.attrs["value_flags"])
+        self.assertEqual(df.attrs["value_flags"][("Cn", "boiling_point_k")]["tag"], "predicted")
         self.assertEqual(float(df.loc[df["symbol"] == "Cn", "boiling_point_k"].iloc[0]), 357.0)
 
     def test_loader_rejects_missing_columns(self):

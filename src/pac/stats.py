@@ -23,8 +23,10 @@ class BoundaryJumpResult:
     interior_values: np.ndarray
     boundary_median: float
     interior_median: float
+    median_difference: float
     u_statistic: float
     p_value: float
+    cliffs_delta: float
 
     @property
     def count_boundary(self) -> int:
@@ -67,6 +69,9 @@ def boundary_jump_result(df: pd.DataFrame, property_name: str) -> Optional[Bound
         return None
 
     u_stat, p_value = mannwhitneyu(boundary_values, interior_values, alternative="greater")
+    n_boundary = boundary_values.size
+    n_interior = interior_values.size
+    cliffs_delta = (2 * u_stat) / (n_boundary * n_interior) - 1
 
     return BoundaryJumpResult(
         property_name=property_name,
@@ -74,8 +79,10 @@ def boundary_jump_result(df: pd.DataFrame, property_name: str) -> Optional[Bound
         interior_values=interior_values,
         boundary_median=float(np.median(boundary_values)),
         interior_median=float(np.median(interior_values)),
+        median_difference=float(np.median(boundary_values) - np.median(interior_values)),
         u_statistic=float(u_stat),
         p_value=float(p_value),
+        cliffs_delta=float(cliffs_delta),
     )
 
 
@@ -112,13 +119,26 @@ def evaluate_boundary_jumps(
             "property": [r.property_name for r in records],
             "boundary_median": [r.boundary_median for r in records],
             "interior_median": [r.interior_median for r in records],
+            "median_difference": [r.median_difference for r in records],
             "median_ratio": [r.median_ratio for r in records],
             "count_boundary": [r.count_boundary for r in records],
             "count_interior": [r.count_interior for r in records],
             "u_statistic": [r.u_statistic for r in records],
             "p_value": [r.p_value for r in records],
+            "cliffs_delta": [r.cliffs_delta for r in records],
         }
     ).sort_values("property").reset_index(drop=True)
+
+    value_flags = getattr(df, "attrs", {}).get("value_flags", {})
+    if value_flags:
+        flagged_lookup = {}
+        for (symbol, column), meta in value_flags.items():
+            flagged_lookup.setdefault(column, []).append(f"{symbol} ({meta.get('tag', 'flagged')})")
+        table["flagged_symbols"] = [
+            ", ".join(sorted(flagged_lookup.get(prop, []))) for prop in table["property"]
+        ]
+    else:
+        table["flagged_symbols"] = ""
 
     return table, records
 

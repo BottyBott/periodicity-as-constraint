@@ -29,7 +29,7 @@ source .venv/bin/activate
 pip install numpy pandas scipy matplotlib scikit-learn
 python3 examples/staircase_ionization.py         # staircase plot with period boundaries (writes figures/staircase_ionization.png)
 python3 examples/smooth_vs_steps.py              # smooth vs constraint comparison (metrics + diagnostic figure)
-python3 examples/boundary_jumps.py               # boundary jump stats (CSV + boxplot)
+python3 examples/boundary_jumps.py               # boundary jump stats (CSV + boxplot + effect sizes)
 ```
 
 The first three examples are ready today; the remaining modules will appear as the modelling and test harness firm up. Meanwhile, `data/elements.csv` is ready for exploration in notebooks or ad-hoc scripts.
@@ -64,7 +64,9 @@ Running `python examples/staircase_ionization.py` saves `figures/staircase_ioniz
 
 Running `python examples/smooth_vs_steps.py` prints cross-validated MAE/BIC metrics contrasting spline(Z) and constraint models, writes `reports/smooth_vs_steps_metrics.csv`, and saves `figures/smooth_vs_steps.png`.
 
-Running `python examples/boundary_jumps.py` reports Mann–Whitney U statistics comparing period-boundary jumps vs. interior steps, writes `reports/boundary_jump_stats.csv`, and saves `figures/boundary_jump_boxplot.png`.
+Running `python examples/boundary_jumps.py` reports Mann–Whitney U statistics comparing period-boundary jumps vs. interior steps, writes `reports/boundary_jump_stats.csv`, and saves both `figures/boundary_jump_boxplot.png` and `figures/boundary_effect_sizes.png` (the latter summarises effect sizes per property).
+
+Loader metadata exposes per-value uncertainty flags via `df.attrs["value_flags"]`, and downstream summaries automatically surface the affected symbols (e.g., predicted transactinide thermals).
 
 ### Source
 The CSV is derived from the [Bowserinator/Periodic-Table-JSON](https://github.com/Bowserinator/Periodic-Table-JSON) dataset (retrieved 2025-10-17). The upstream project lists the data as free to use; retain attribution if you redistribute this derivative.

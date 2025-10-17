@@ -99,6 +99,44 @@ def create_boxplot(result, *, save_path: Path | None, show: bool) -> None:
     plt.close(fig)
 
 
+def create_effect_size_plot(
+    table: pd.DataFrame,
+    *,
+    metric: str = "cliffs_delta",
+    save_path: Path | None,
+    show: bool,
+) -> None:
+    if table.empty or metric not in table.columns:
+        return
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    x = range(len(table))
+    ax.bar(
+        x,
+        table[metric],
+        color="#264653",
+        alpha=0.8,
+    )
+    ax.axhline(0, color="#6c757d", linestyle="--", linewidth=1.0)
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(table["property"], rotation=30, ha="right")
+    ax.set_ylabel(metric.replace("_", " ").title())
+    ax.set_title("Effect sizes for boundary vs. interior differences")
+    ax.grid(alpha=0.2, axis="y")
+
+    fig.tight_layout()
+
+    if save_path is not None:
+        save_path = save_path.resolve()
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
+        print(f"Saved effect size plot to {save_path}")
+
+    if show:
+        plt.show()
+    plt.close(fig)
+
+
 def main() -> None:
     args = parse_args()
     df = load_elements()
@@ -132,6 +170,11 @@ def main() -> None:
 
     figure_path = None if args.no_save else args.figure
     create_boxplot(selected, save_path=figure_path, show=args.show)
+
+    effect_path = None
+    if not args.no_save:
+        effect_path = args.figure.with_name("boundary_effect_sizes.png")
+    create_effect_size_plot(table, save_path=effect_path, show=False)
 
 
 if __name__ == "__main__":

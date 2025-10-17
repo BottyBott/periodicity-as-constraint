@@ -35,13 +35,19 @@ class BoundaryJumpTestCase(unittest.TestCase):
             "property",
             "boundary_median",
             "interior_median",
+            "median_difference",
             "median_ratio",
             "count_boundary",
             "count_interior",
             "u_statistic",
             "p_value",
+            "cliffs_delta",
+            "flagged_symbols",
         }
         self.assertTrue(required_columns.issubset(table.columns))
+
+        first_row = table.iloc[0]
+        self.assertGreater(first_row["cliffs_delta"], 0)
 
 
 if __name__ == "__main__":

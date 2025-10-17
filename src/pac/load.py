@@ -36,14 +36,33 @@ _COLUMN_SPECS: Iterable[ColumnSpec] = (
     ColumnSpec("boiling_point_k", "float", allow_null=True, min_value=0.0),
 )
 
-UNCERTAINTY_NOTES: Mapping[tuple[str, str], str] = {
-    ("He", "melting_point_k"): "Helium only solidifies under pressure (~2–3 MPa).",
-    ("Cn", "boiling_point_k"): "Adsorption-derived estimate; 357−108+112 K (Los Alamos).",
-    ("Fl", "melting_point_k"): "Predicted value from transactinide models.",
-    ("Fl", "boiling_point_k"): "Predicted value from transactinide models.",
-    ("Og", "boiling_point_k"): "Predicted from relativistic calculations; high uncertainty.",
-    ("Hs", "melting_point_k"): "Predicted melting point from theoretical studies.",
+VALUE_FLAGS: Mapping[tuple[str, str], Mapping[str, str]] = {
+    ("He", "melting_point_k"): {
+        "tag": "pressure-dependent",
+        "note": "Helium only solidifies under ~2–3 MPa; value reflects high-pressure measurements.",
+    },
+    ("Cn", "boiling_point_k"): {
+        "tag": "predicted",
+        "note": "Adsorption-derived estimate; 357−108+112 K (Los Alamos).",
+    },
+    ("Fl", "melting_point_k"): {
+        "tag": "predicted",
+        "note": "Predicted transactinide melting point from theoretical models.",
+    },
+    ("Fl", "boiling_point_k"): {
+        "tag": "predicted",
+        "note": "Predicted transactinide boiling point from theoretical models.",
+    },
+    ("Og", "boiling_point_k"): {
+        "tag": "predicted",
+        "note": "Relativistic calculation; large uncertainty.",
+    },
+    ("Hs", "melting_point_k"): {
+        "tag": "predicted",
+        "note": "Predicted melting point from transactinide models.",
+    },
 }
+UNCERTAINTY_NOTES: Mapping[tuple[str, str], str] = {key: value["note"] for key, value in VALUE_FLAGS.items()}
 
 
 def load_elements(path: str | Path | None = None) -> pd.DataFrame:
@@ -112,6 +131,7 @@ def load_elements(path: str | Path | None = None) -> pd.DataFrame:
     df.attrs["schema_version"] = 1
     df.attrs["uncertainty_notes"] = UNCERTAINTY_NOTES
     df.attrs["column_specs"] = _COLUMN_SPECS
+    df.attrs["value_flags"] = VALUE_FLAGS
 
     return df
 
