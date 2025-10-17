@@ -10,13 +10,13 @@ The outline below tracks the build-out path. Files checked off are present; unch
 
 - [x] `README.md`
 - [x] `data/elements.csv`
-- [ ] `src/pac/__init__.py`
-- [ ] `src/pac/load.py`
-- [ ] `src/pac/models.py`
+- [x] `src/pac/__init__.py`
+- [x] `src/pac/load.py`
+- [x] `src/pac/models.py`
 - [ ] `src/pac/figures.py`
 - [ ] `src/pac/tests_gradualism.py`
-- [ ] `examples/staircase_ionization.py`
-- [ ] `examples/smooth_vs_steps.py`
+- [x] `examples/staircase_ionization.py`
+- [x] `examples/smooth_vs_steps.py`
 - [ ] `examples/boundary_jumps.py`
 - [ ] `tests/test_boundary_jumps.py`
 - [ ] `tests/test_group_period_gain.py`
@@ -28,11 +28,11 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install numpy pandas scipy matplotlib scikit-learn
 python3 examples/staircase_ionization.py         # staircase plot with period boundaries (writes figures/staircase_ionization.png)
-python3 -m examples.smooth_vs_steps              # forthcoming: smooth vs constraint model comparison
+python3 examples/smooth_vs_steps.py              # smooth vs constraint comparison (metrics + diagnostic figure)
 python3 -m examples.boundary_jumps               # forthcoming: boundary jump summary stats
 ```
 
-The staircase example is ready today; the remaining modules will appear as the modelling and test harness firm up. Meanwhile, `data/elements.csv` is ready for exploration in notebooks or ad-hoc scripts.
+The staircase and smooth-vs-steps examples are ready today; the remaining modules will appear as the modelling and test harness firm up. Meanwhile, `data/elements.csv` is ready for exploration in notebooks or ad-hoc scripts.
 
 ## Data: `data/elements.csv`
 One tidy table (118 rows) provides the only required input for the analyses. Columns and units:
@@ -62,12 +62,24 @@ Additional adjustments and conventions:
 
 Running `python examples/staircase_ionization.py` saves `figures/staircase_ionization.png`, highlighting the repeated resets in first ionization energy across period boundaries.
 
+Running `python examples/smooth_vs_steps.py` prints cross-validated MAE/BIC metrics contrasting spline(Z) and constraint models, writes `reports/smooth_vs_steps_metrics.csv`, and saves `figures/smooth_vs_steps.png`.
+
 ### Source
 The CSV is derived from the [Bowserinator/Periodic-Table-JSON](https://github.com/Bowserinator/Periodic-Table-JSON) dataset (retrieved 2025-10-17). The upstream project lists the data as free to use; retain attribution if you redistribute this derivative.
 
 ## Planned analyses
 - **Staircase ionization** — implemented in `examples/staircase_ionization.py`, highlighting discontinuities with period boundary markers.
+- **Smooth vs. constraint models** — implemented in `examples/smooth_vs_steps.py`, contrasting spline(Z) fits with group/period/block regression.
 - **Boundary jump tests** — compare difference magnitudes at phase boundaries against within-period steps (Mann–Whitney U tests).
-- **Smooth vs. constraint models** — contrast spline/polynomial fits of `p ~ f(Z)` with piecewise/group-period models using BIC and cross-validated MAE.
 - **Context-driven variance gain** — quantify predictive lift from `group`, `period`, and `block` over atomic number alone.
 - **Changepoint sanity checks** — simple segmentation confirming that detected changepoints align with known period resets.
+
+
+## Tests
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install numpy pandas scipy matplotlib scikit-learn
+python3 -m unittest discover -s tests
+```
+Regression tests assert that constraint models match or beat spline(Z) on first ionization energy and that prediction frames expose the expected diagnostics.
